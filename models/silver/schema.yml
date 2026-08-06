@@ -1,0 +1,13 @@
+version: 2
+
+models:
+  - name: silver_orders
+    description: "Deduplicated orders, cancelled orders excluded. One row per order_id."
+    columns:
+      - name: order_id
+        tests:
+          - unique          # dedup logic upstream must guarantee this — good gate to have
+          - not_null
+      - name: order_amount
+        tests:
+          - not_null

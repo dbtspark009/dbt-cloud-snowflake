@@ -1,0 +1,4 @@
+# Only needed on the Airflow side. Note: NO dbt-snowflake package here —
+# Airflow never runs dbt itself in the dbt Cloud combo, so it doesn't need
+# dbt installed at all, just this provider to call the dbt Cloud API.
+apache-airflow-providers-dbt-cloud

@@ -1,0 +1,34 @@
+name: 'demo_pipeline'
+version: '1.0.0'
+config-version: 2
+
+# NOTE for dbt Cloud: there is no "profile:" credentials file to match this
+# against. dbt Cloud connects to Snowflake via the Connection you configure
+# in Account Settings, and each Environment (Dev/QA/Prod) in the dbt Cloud
+# UI supplies its own target schema — same role this used to play locally.
+
+model-paths: ["models"]
+clean-targets: ["target", "dbt_packages"]
+
+models:
+  demo_pipeline:
+    # ----------------------------------------------------------------
+    # Every model's SCHEMA is built as: "<environment's base schema>_<suffix>"
+    # The base schema comes from whichever dbt Cloud Environment ran the
+    # job (Dev / QA / Prod), configured in the dbt Cloud UI, not a file:
+    #   Dev environment  (schema: DEV)  -> DEV_BRONZE,  DEV_SILVER,  DEV_GOLD
+    #   QA environment   (schema: QA)   -> QA_BRONZE,   QA_SILVER,   QA_GOLD
+    #   Prod environment (schema: PROD) -> PROD_BRONZE, PROD_SILVER, PROD_GOLD
+    # ----------------------------------------------------------------
+    bronze:
+      +schema: bronze
+      +materialized: view
+    silver:
+      +schema: silver
+      +materialized: table
+    gold:
+      +schema: gold
+      +materialized: table
+
+vars:
+  valid_order_statuses: ['completed', 'pending']

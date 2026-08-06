@@ -1,0 +1,13 @@
+version: 2
+
+models:
+  - name: gold_daily_revenue
+    description: "One row per day, aggregated order metrics for dashboards."
+    columns:
+      - name: order_day
+        tests:
+          - not_null
+          - unique
+      - name: total_revenue
+        tests:
+          - not_null

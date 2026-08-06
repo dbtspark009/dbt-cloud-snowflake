@@ -1,0 +1,14 @@
+version: 2
+
+models:
+  - name: bronze_orders
+    description: "Lightly-typed pass-through of raw orders."
+    columns:
+      - name: order_id
+        description: "Natural key from the source system, may repeat (dupes handled downstream in silver)."
+        tests:
+          - not_null
+      - name: order_status
+        tests:
+          - accepted_values:
+              values: ['completed', 'cancelled', 'pending']

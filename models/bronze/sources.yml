@@ -2,8 +2,8 @@ version: 2
 
 sources:
   - name: raw
-    database: DEMO_DB
-    schema: RAW                     # the shared landing schema from setup_raw_data.sql
+    database: PWM_Staging
+    schema: dbo                     # the shared landing schema from setup_raw_data.sql
     tables:
       - name: orders
         description: "Raw orders table, loaded by ingestion tool. One row per event, may contain duplicates."

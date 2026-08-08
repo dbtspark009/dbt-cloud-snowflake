@@ -2,33 +2,51 @@ name: 'demo_pipeline'
 version: '1.0.0'
 config-version: 2
 
-# NOTE for dbt Cloud: there is no "profile:" credentials file to match this
-# against. dbt Cloud connects to Snowflake via the Connection you configure
-# in Account Settings, and each Environment (Dev/QA/Prod) in the dbt Cloud
-# UI supplies its own target schema — same role this used to play locally.
-
 model-paths: ["models"]
 clean-targets: ["target", "dbt_packages"]
 
 models:
   demo_pipeline:
-    # ----------------------------------------------------------------
-    # Every model's SCHEMA is built as: "<environment's base schema>_<suffix>"
-    # The base schema comes from whichever dbt Cloud Environment ran the
-    # job (Dev / QA / Prod), configured in the dbt Cloud UI, not a file:
-    #   Dev environment  (schema: DEV)  -> DEV_BRONZE,  DEV_SILVER,  DEV_GOLD
-    #   QA environment   (schema: QA)   -> QA_BRONZE,   QA_SILVER,   QA_GOLD
-    #   Prod environment (schema: PROD) -> PROD_BRONZE, PROD_SILVER, PROD_GOLD
-    # ----------------------------------------------------------------
     bronze:
-      +schema: bronze
+      +schema: dbo
       +materialized: view
     silver:
-      +schema: silver
+      +schema: dbo
       +materialized: table
     gold:
-      +schema: gold
+      +schema: dbo
       +materialized: table
 
 vars:
   valid_order_statuses: ['completed', 'pending']
+
+# ----------------------------------------------------------------
+# on-run-start hooks: raw SQL that runs ONCE, automatically, at the
+# very start of every `dbt build`/`dbt run` — before any models.
+# No database name is hardcoded here on purpose: RAW.ORDERS resolves
+# against whatever database the CURRENT environment's connection
+# points at (PWM_STAGING for dev, PWM_STAGING_QA for QA, etc.).
+#
+# CREATE OR REPLACE (not CREATE IF NOT EXISTS) is deliberate — it
+# makes this safely re-runnable. Every build resets raw data to the
+# same known state instead of accumulating duplicate inserts.
+# ----------------------------------------------------------------
+on-run-start:
+  - "CREATE DATABASE IF NOT EXISTS PWM_Staging"
+  - "CREATE SCHEMA IF NOT EXISTS PWM_Staging.dbo"
+  - "CREATE OR REPLACE TABLE dbo.ORDERS (
+        order_id      VARCHAR,
+        customer_id   VARCHAR,
+        order_status  VARCHAR,
+        order_amount  FLOAT,
+        order_date    TIMESTAMP_NTZ
+     )"
+  - "INSERT INTO dbo.ORDERS VALUES
+        ('ord_1', 'cust_1', 'completed',  120.50, '2026-08-01 10:15:00'),
+        ('ord_2', 'cust_2', 'completed',   45.00, '2026-08-01 11:02:00'),
+        ('ord_3', 'cust_1', 'cancelled',   75.25, '2026-08-02 09:40:00'),
+        ('ord_4', 'cust_3', 'completed',  210.00, '2026-08-02 14:22:00'),
+        ('ord_5', 'cust_2', 'pending',     30.00, '2026-08-03 08:05:00'),
+        ('ord_6', 'cust_3', 'completed',   99.99, '2026-08-03 16:47:00'),
+        ('ord_7', 'cust_1', 'completed',  150.00, '2026-08-03 18:10:00'),
+        ('ord_1', 'cust_1', 'completed',  120.50, '2026-08-01 10:15:00')"

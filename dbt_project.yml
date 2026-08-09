@@ -32,8 +32,8 @@ vars:
 # same known state instead of accumulating duplicate inserts.
 # ----------------------------------------------------------------
 on-run-start:
-  - "CREATE DATABASE IF NOT EXISTS PWM_Staging"
-  - "CREATE SCHEMA IF NOT EXISTS PWM_Staging.dbo"
+  - "CREATE DATABASE IF NOT EXISTS {{ target.database }}"
+  - "CREATE SCHEMA IF NOT EXISTS {{ target.database }}.dbo"
   - "CREATE OR REPLACE TABLE dbo.ORDERS (
         order_id      VARCHAR,
         customer_id   VARCHAR,

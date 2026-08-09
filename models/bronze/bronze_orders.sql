@@ -13,5 +13,5 @@ select
     order_status,
     order_amount::float          as order_amount,
     order_date::timestamp_ntz    as order_date,
-    current_timestamp()          as _loaded_at   -- lineage/debugging helper
+    current_timestamp()           as _loaded_at   -- lineage/debugging helper
 from {{ source('raw', 'orders') }}

@@ -2,7 +2,6 @@ version: 2
 
 sources:
   - name: raw
-    database: PWM_Staging
     schema: dbo                     # the shared landing schema from setup_raw_data.sql
     tables:
       - name: orders
